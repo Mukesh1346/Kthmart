@@ -28,6 +28,7 @@ import Sidebar from "@/app/components/SideBar/SideBar";
 import FilterBar from "@/app/components/FilterBar/FilterBar";
 import FilterCategories from "@/app/components/FilterCategories/FilterCategories";
 
+
 const Page = () => {   
   const dispatch = useDispatch();
   const { id: subcategoryId } = useParams();
@@ -39,7 +40,9 @@ const Page = () => {
   const { products, loading, error } = useSelector(
     (state) => state.productByCategory
   );   
- console.log(products)
+//  console.log(products)
+
+ console.log("subcategoryId:", subcategoryId);
 
   let cartItemsValue = [];
   if (user?.email) {
