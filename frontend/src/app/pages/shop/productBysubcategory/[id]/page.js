@@ -156,25 +156,7 @@ const Page = () => {
   };
   return (
     <>
-      {/* <ShopBanner /> */}
-      {/* <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between px-5 py-2 bg-gray-200">
-          <div className="text-sm text-gray-600 text-left">
-            {products?.length > 0
-              ? `Showing ${products?.length} products`
-              : "No products found"}
-          </div>
-          <div>
-            <span>Sort by:</span>
-            <select className="p-2 text-black focus:outline-none">
-              <option value="latest">Latest</option>
-              <option value="popularity">Popularity</option>
-              <option value="lowToHigh">Price: Low to High</option>
-              <option value="highToLow">Price: High to Low</option>
-            </select>
-          </div>
-        </div>
-      </div> */}
+   
 
       <div className="max-w-7xl mx-auto px-4 py-8 mt-20 ">
         <div className="flex justify-center ">
