@@ -1,14 +1,15 @@
 "use client";
 import React, { useEffect } from "react";
 import { Heart } from "lucide-react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { addToCart } from "@/app/redux/AddtoCart/cartSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "next/navigation";
-import ShopBanner from "@/app/components/Shop/ShopBanner";
-import book1 from "../../../../Images/DBS/1.jpg";
+// import ShopBanner from "@/app/components/Shop/ShopBanner";
+// import book1 from "../../../../Images/DBS/1.jpg";
 import { fetchProductsByCategory } from "@/app/redux/features/productByCategory/productByCategorySlice";
 import {
   addToCartAPIThunk,
@@ -25,7 +26,7 @@ import {
 import { serverUrl } from "@/app/redux/features/axiosInstance";
 import CallBackImg from "../../../../Images/DBS/DBSLOGO.jpg";
 import Sidebar from "@/app/components/SideBar/SideBar";
-import FilterBar from "@/app/components/FilterBar/FilterBar";
+// import FilterBar from "@/app/components/FilterBar/FilterBar";
 import FilterCategories from "@/app/components/FilterCategories/FilterCategories";
 
 
@@ -34,6 +35,10 @@ const Page = () => {
   const { id: subcategoryId } = useParams();
   const { cartItems } = useSelector((state) => state.cart);
   const { items: apiCartItems } = useSelector((state) => state.apiCart);
+
+const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+const [selectedSubcategoryId, setSelectedSubcategoryId] = useState(null);
+
     
   const wishlistItems = useSelector((state) => state.wishlist.wishlistItems);
   const user = useSelector((state) => state.login.user);
@@ -51,11 +56,11 @@ const Page = () => {
     cartItemsValue = cartItems;
   }
   useEffect(() => {
-    if (subcategoryId) {
-      dispatch(fetchProductsByCategory(subcategoryId));
+    if (selectedSubcategoryId) {
+      dispatch(fetchProductsByCategory(selectedSubcategoryId));
     }
-  }, [dispatch, subcategoryId]);
-
+  }, [dispatch, selectedSubcategoryId]);
+  
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
@@ -97,7 +102,7 @@ const Page = () => {
 
     if (!user && !user?.email) {
       try {
-        await dispatch(addToCart(cartItem));
+         await dispatch(addToCart(cartItem));
 
         toast.success(
           exists
@@ -160,7 +165,7 @@ const Page = () => {
 
       <div className="max-w-7xl mx-auto px-4 py-8 mt-20 ">
         <div className="flex justify-center ">
-        <FilterBar/>
+        {/* <FilterBar/> */}
         </div>
         {/* <FilterCategories/> */}
       </div>
@@ -169,12 +174,18 @@ const Page = () => {
   <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
     {/* Sidebar - col-md-4 */}
     <aside className="md:col-span-4 lg:col-span-3">
-      <Sidebar />
-    </aside>
+  <Sidebar 
+    categoryId={selectedCategoryId}
+    onSubcategorySelect={(id) => setSelectedSubcategoryId(id)}
+  />
+</aside>
 
-    {/* Main Content - col-md-8 */}
-    <main className="md:col-span-8 lg:col-span-9">
-      <div> <FilterCategories/> </div>
+<main className="md:col-span-8 lg:col-span-9">
+  <FilterCategories 
+    onCategorySelect={(cat) => setSelectedCategoryId(cat._id)} 
+  />
+
+
       {products?.length === 0 ? (  
         <div className="text-center py-10 text-gray-500">
           No products found.

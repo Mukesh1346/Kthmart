@@ -450,9 +450,9 @@ export default function ProductDetails() {
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
                       {book?.details && (
-                        <p className="text-sm leading-relaxed">
+                        <div className="text-sm leading-relaxed">
                           {htmlParser.parse(book.details)}
-                        </p>
+                        </div>
                       )}
                     </div>
                   </div>

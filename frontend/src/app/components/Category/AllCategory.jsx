@@ -77,7 +77,7 @@ const AllCategory = () => {
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
           {categories.map((category) => (
             <Link
-              href={`/pages/categories/${category._id}`}
+              href={`/pages/categories/${category._id}`} 
               // href={`/pages/shop/productBysubcategory/${category._id}`}   
               key={category._id} 
               className="flex justify-center items-center p-0 m-0"

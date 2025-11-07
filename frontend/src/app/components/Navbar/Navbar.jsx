@@ -1,4 +1,7 @@
 // File: Navbar.jsx
+
+    "use client";
+
 import React, { useState, useEffect } from "react";
 import { ShoppingCart, Heart, Menu, User, Search, Home } from "lucide-react";
 import Link from "next/link"; // remove this line if not using Next.js
@@ -130,7 +133,7 @@ const Navbar = () => {
 
           {isLoggedIn ? (
             <>
-              <ShoppingCart className="w-6 h-6 text-gray-700" />
+             <a href="/pages/cart"> <ShoppingCart className="w-6 h-6 text-gray-700" /></a>
               <Heart className="w-6 h-6 text-gray-700" />
               <Menu className="w-6 h-6 text-gray-700" />
             </>
