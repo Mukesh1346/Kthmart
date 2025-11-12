@@ -163,7 +163,7 @@ const multipleProducts = async (req, res) => {
             if (product.discount) {
               product.finalPrice =
                 Number(priceInInr) -
-                  (Number(priceInInr) * Number(product.discount)) / 100 ??
+                (Number(priceInInr) * Number(product.discount)) / 100 ??
                 10000;
             } else {
               product.finalPrice = priceInInr;
@@ -271,7 +271,7 @@ const updateProduct = async (req, res) => {
     if ("bestSellingBooks" in req.body) {
       product.bestSellingBooks = req.body.bestSellingBooks === "true";
     }
- 
+
     product.priceInDollors = priceInDollors ?? product.priceInDollors;
     product.priceInEuros = priceInEuros ?? product.priceInEuros;
     product.price = price ?? product.price;
@@ -423,22 +423,68 @@ const getProductByCategory = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+// const getProductsByMainCategory = async (req, res) => {
+//   const { id: mainCategoryId, subcategoryId } = req.params;
+//   const limit = parseInt(req.query.limit) || 50;
+//   const page = parseInt(req.query.page) || 1;
+//   try {
+//     const categories = await Category.find(
+//       { mainCategory: mainCategoryId },
+//       "_id"
+//     );
+//     const categoryIds = categories.map((cat) => cat._id);
+//     const subCategories = await SubCategory.find(
+//       { category: { $in: categoryIds } },
+//       "_id"
+//     );
+//     const subCategoryIds = subCategories.map((sub) => sub._id);
+
+//     const filter = {
+//       $or: [
+//         { mainCategory: mainCategoryId },
+//         { category: { $in: categoryIds } },
+//         { subCategory: { $in: subCategoryIds } },
+//       ],
+//     };
+//     console.log("filter==>", mainCategoryId);
+
+//     const totalCount = await Product.countDocuments({ mainCategory: mainCategoryId || filter });
+//     const products = await Product.findById({ mainCategory: mainCategoryId })
+//       .skip((page - 1) * limit)
+//       .limit(limit)
+//       .populate("category")
+//       .populate("subCategory")
+//       .populate("mainCategory");
+
+//     return res.status(200).json({
+//       message: "Products under mainCategory",
+//       products,
+//       totalCount,
+//       totalPages: Math.ceil(totalCount / limit),
+//       currentPage: page,
+//     });
+//   } catch (error) {
+//     console.log("get products by main category error", error);
+//     res.status(500).json({ message: "Aggregation failed", error });
+//   }
+// };
+
+
 const getProductsByMainCategory = async (req, res) => {
   const { id: mainCategoryId } = req.params;
   const limit = parseInt(req.query.limit) || 50;
   const page = parseInt(req.query.page) || 1;
+  
   try {
-    const categories = await Category.find(
-      { mainCategory: mainCategoryId },
-      "_id"
-    );
-    const categoryIds = categories.map((cat) => cat._id);
-    const subCategories = await SubCategory.find(
-      { category: { $in: categoryIds } },
-      "_id"
-    );
-    const subCategoryIds = subCategories.map((sub) => sub._id);
+    // Find all categories under the main category
+    const categories = await Category.find({ mainCategory: mainCategoryId }, "_id");
+    const categoryIds = categories.map(cat => cat._id);
 
+    // Find all subcategories under those categories
+    const subCategories = await SubCategory.find({ category: { $in: categoryIds } }, "_id");
+    const subCategoryIds = subCategories.map(sub => sub._id);
+
+    // Build a filter that matches products under any level of this hierarchy
     const filter = {
       $or: [
         { mainCategory: mainCategoryId },
@@ -446,7 +492,11 @@ const getProductsByMainCategory = async (req, res) => {
         { subCategory: { $in: subCategoryIds } },
       ],
     };
+
+    // Count total matching products
     const totalCount = await Product.countDocuments(filter);
+
+    // Find products using pagination
     const products = await Product.find(filter)
       .skip((page - 1) * limit)
       .limit(limit)
@@ -454,6 +504,7 @@ const getProductsByMainCategory = async (req, res) => {
       .populate("subCategory")
       .populate("mainCategory");
 
+      // Respond with paginated results
     return res.status(200).json({
       message: "Products under mainCategory",
       products,
@@ -461,8 +512,9 @@ const getProductsByMainCategory = async (req, res) => {
       totalPages: Math.ceil(totalCount / limit),
       currentPage: page,
     });
+
   } catch (error) {
-    console.log("get products by main category error", error);
+    console.error("get products by main category error:", error);
     res.status(500).json({ message: "Aggregation failed", error });
   }
 };
@@ -726,7 +778,7 @@ const updateProductStock = async (req, res) => {
 const getMultipleProductsById = async (req, res) => {
   try {
     const { productIds } = req.body || {};
-    if(!productIds || !Array.isArray(productIds)) {
+    if (!productIds || !Array.isArray(productIds)) {
       return res.status(400).json({ message: "productIds not provided" });
     }
     const products = await Product.find({ _id: { $in: productIds } });

@@ -4,9 +4,11 @@ export const fetchProductsByCategory = createAsyncThunk(
   "productByCategory/fetchProductsByCategory",
   async (subcategoryId, thunkAPI) => {
     try {
+      console.log("DDDDDD:==>", subcategoryId);
       const response = await axiosInstance.get(
         `/product/product-by-category/${subcategoryId}`
       );
+      console.log("DDDDDDD::=>", response.data);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(

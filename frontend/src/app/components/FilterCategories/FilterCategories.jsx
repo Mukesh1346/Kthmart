@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "@/app/redux/features/getAllCategory/categorySlice";
 
-export default function FilterCategories({ onCategorySelect }) {
+export default function FilterCategories({ onCategorySelect, subcategoryId }) {
   const dispatch = useDispatch();
   const { categories } = useSelector((state) => state.category);
 
-  const [activeCategory, setActiveCategory] = useState(null);
+  const [activeCategory, setActiveCategory] = useState({ _id: subcategoryId } || null);
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -26,11 +26,10 @@ export default function FilterCategories({ onCategorySelect }) {
         <button
           key={cat._id}
           onClick={() => handleCategoryClick(cat)}
-          className={`whitespace-nowrap text-xs sm:text-sm md:text-base px-3 py-1.5 font-medium transition-all rounded-md ${
-            activeCategory?._id === cat._id
-              ? "text-black border-b-2 border-black"
-              : "text-gray-600 hover:text-black"
-          }`}
+          className={`whitespace-nowrap text-xs sm:text-sm md:text-base px-3 py-1.5 font-medium transition-all rounded-md ${activeCategory?._id === cat._id
+            ? "text-black border-b-2 border-black"
+            : "text-gray-600 hover:text-black"
+            }`}
         >
           {cat.Parent_name}
         </button>
