@@ -24,9 +24,8 @@ import {
 import { verifyUser } from "@/app/redux/features/auth/loginSlice";
 
 import CallBackImg from "../../Images/DBS/DBSLOGO.jpg";
-import { Cursor } from "react-simple-typewriter";
 
-const BestSeller = ({ productlength = 4, btnlength = 8 }) => {
+const Featureproduct = ({ productlength = 4, btnlength = 8 }) => {
   const dispatch = useDispatch();
   const pathname = usePathname();
 
@@ -46,9 +45,7 @@ const BestSeller = ({ productlength = 4, btnlength = 8 }) => {
 
     const fetchNewArrivals = async () => {
       try {
-        const response = await axiosInstance.get(
-          "/product/get-best-selling-books"
-        );
+        const response = await axiosInstance.get("/product/get-featured-books");
         setProduct(response.data.products || []);
       } catch (err) {
         setError("Failed to load New Arrival product. Please try again later.");
@@ -157,16 +154,13 @@ const BestSeller = ({ productlength = 4, btnlength = 8 }) => {
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <div>
-          <h2 className="text-xl font-bold text-gray-800">
-            Best Selling Products
-          </h2>
+          <h2 className="text-xl font-bold text-gray-800">Featured Products</h2>
           <p className="text-sm max-w-48 md:max-w-full text-gray-500">
-            Explore our top-selling titles this month at Kthmart
+            Discover the most popular products of the month at Kthmart
           </p>
         </div>
-
-        {pathname !== "/pages/bestSellerbook" && (
-          <Link href="/pages/bestSellerbook">
+        {pathname !== "/pages/featurebook" && (
+          <Link href="/pages/featurebook">
             <button className="view-all-btn">
               View All <ArrowRight size={16} />
             </button>
@@ -175,25 +169,25 @@ const BestSeller = ({ productlength = 4, btnlength = 8 }) => {
       </div>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-3">
         {visibleProducts.map((product) => {
-          const inCart = user?.email
-            ? cartItemsValue.some(
-                (item) => item?.productId?._id === product._id
-              )
-            : cartItemsValue.some((item) => item.id === product._id);
+          const isInCart = cartItemsValue?.some((item) =>
+            user?.email
+              ? item?.productId?._id === product._id
+              : item?.id === product._id
+          );
 
-          const inWishlist = user?.email
-            ? wishlistItems?.some((item) => item?._id === product._id)
+          const isInWishlist = user?.email
+            ? wishlistItems?.some((item) => item._id === product._id)
             : wishlistItems?.some((item) => item.id === product._id);
 
           return (
             <div
               key={product._id}
-              className="flex flex-col md:flex-row border border-gray-200 rounded-lg bg-white p-3 hover:shadow-md transition-shadow"
+              className="flex md:flex-row flex-col border border-gray-200 bg-white px-2"
             >
-              {/* Image and Badge */}
-              <div className="relative w-full md:w-1/3 mr-3">
+              <div className="relative">
+                {/* Discount Badge */}
                 {typeof product.discount === "number" &&
                   product.discount > 0 && (
                     <div className="absolute top-2 left-0 bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded-e-2xl z-10">
@@ -201,108 +195,99 @@ const BestSeller = ({ productlength = 4, btnlength = 8 }) => {
                     </div>
                   )}
 
+                {/* Wishlist Icon */}
                 <div
                   className="bg-white text-black absolute top-2 right-3 shadow-md rounded-2xl p-1 cursor-pointer"
                   onClick={() =>
                     handleAddToWishlist(
                       product._id,
                       product.title,
-                      product?.images[0],
+                      product.images[0],
                       product.finalPrice,
                       product.oldPrice
                     )
                   }
                 >
-                  {inWishlist ? "❤️" : <Heart size={16} />}
+                  {isInWishlist ? "❤️" : <Heart size={16} />}
                 </div>
 
+                {/* Product Image */}
                 <Link href={`/pages/shop/${product._id}`}>
-                  <div className="h-35 flex justify-center m-auto items-center">
+                  <div className="w-30 h-50 lg:w-40 md:w-35 flex justify-center m-auto p-2 items-center mb-2 bg-white">
                     <Image
                       src={
-                        product?.images[0]
-                          ? `${serverUrl}/public/image/${product?.images[0]}`
+                        product?.images?.[0]
+                          ? `${serverUrl}/public/image/${product.images[0]}`
                           : CallBackImg
                       }
+                      width={300}
+                      height={300}
                       alt={product.title}
-                      width={112}
-                      height={112}
-                      className="object-contain h-full w-full"
+                      className="object-contain h-full"
                     />
                   </div>
                 </Link>
               </div>
 
               {/* Product Details */}
-              <div className="w-full md:w-2/3 flex flex-col justify-between">
-                <div>
-                  <Link href={`/pages/shop/${product._id}`}>
-                    <h3 className="mt-2 text-sm md:text-md font-normal md:font-semibold line-clamp-2 ">
-                      {product.title}
-                    </h3>
-                    <h3 className="mt-1 text-sm text-gray-800 font-semibold italic line-clamp-1">
-                    {product.pages}
-                    </h3>
-                  </Link>
+              <div className="w-full">
+                <Link href={`/pages/shop/${product._id}`}>
+                  <h3 className="mt-2 text-sm md:text-md font-normal md:font-semibold line-clamp-2 ">
+                    {product.title}
+                  </h3>
+                  <h3 className="mt-1 text-sm text-gray-800 font-semibold italic line-clamp-1">
+                  {product.pages}
+                  </h3>
+                </Link>
+
+                {/* Price */}
+                <div className="mt-2">
+                  <div className="text-md md:text-lg font-bold text-red-600">
+                    ₹{product.finalPrice}
+                  </div>
+                  {typeof product.discount === "number" &&
+                    product.discount > 0 && (
+                      <div className="text-sm text-gray-800 font-bold line-through">
+                        ₹ {product.price}
+                      </div>
+                    )}
                 </div>
 
-                <div className="mt-auto">
-                  <div className="flex items-center gap-2">
-                    <div className="text-md md:text-lg font-bold text-red-600">
-                      ₹{product.finalPrice}
-                    </div>
-                    {typeof product.discount === "number" &&
-                      product.discount > 0 && (
-                        <div className="text-sm text-gray-800 font-bold line-through">
-                          ₹ {product.price}
-                        </div>
-                      )}
-                  </div>
-
-                  <div className="flex gap-2 justify-between mt-4 bg-gray-200 p-1 rounded"> 
-                   <p className="text-xs text-[11px]   sm:text-sm ">₹213/pack for 9 packs+</p> <span className="text-green-600 sm:text-sm">Add 9</span>
-                   </div>
-
-                   <div className="flex gap-2 justify-between mt-4 bg-gray-200 p-1 rounded"> 
-                   <p className="text-xs sm:text-sm ">₹416/kg for 6 kgs+</p> <span className="text-green-600 sm:text-sm">Add 6</span>
-                   </div>
-
-
-                  <button
-                  style={{cursor: "pointer"}}
+                {/* Add to Cart Button */}
+                   <button
+                   style={{cursor: "pointer"}}
                     className={
                       product.stock === 0
                         ? "out-of-stock-btn"
-                        : inCart
+                        : isInCart
                         ? "added-to-cart-btn"
                         : "add-to-cart-btn"
-                        
                     }
                     onClick={() => handleAddToCart(product)}
                     disabled={product.stock === 0}
                   >
                     {product.stock === 0
                       ? "Out of Stock"
-                      : inCart
+                      : isInCart
                       ? "Added"
                       : "Add to cart 🛒"}
                   </button>
-                </div>
               </div>
             </div>
           );
         })}
       </div>
 
-      {visibleProducts.length > btnlength && (
+      {/* View All Button */}
+      {products?.length > btnlength && (
         <div className="text-center mt-4">
-          <button className="view-all-btn m-auto">
-            View All <ChevronDown size={16} />
-          </button>
+          <Link href={`/pages/featurebook`}>
+            <button className="view-all-btn m-auto">View All</button>
+          </Link>
         </div>
       )}
     </div>
   );
 };
 
-export default BestSeller;
+export default Featureproduct;

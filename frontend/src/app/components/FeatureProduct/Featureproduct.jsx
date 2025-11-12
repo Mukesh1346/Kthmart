@@ -236,7 +236,7 @@ const Featureproduct = ({ productlength = 4, btnlength = 8 }) => {
                     {product.title}
                   </h3>
                   <h3 className="mt-1 text-sm text-gray-800 font-semibold italic line-clamp-1">
-                  {product.pages}
+                    {product.pages}
                   </h3>
                 </Link>
 
@@ -253,25 +253,36 @@ const Featureproduct = ({ productlength = 4, btnlength = 8 }) => {
                     )}
                 </div>
 
+                <div className="flex gap-2 justify-between mt-4 bg-gray-200 p-1 rounded"> 
+                   <p className="text-xs text-[11px]   sm:text-sm ">₹213/pack for 9 packs+</p> <span className="text-green-600 sm:text-sm">Add 9</span>
+                   </div>
+
+                   <div className="flex gap-2 justify-between mt-4 bg-gray-200 p-1 rounded"> 
+                   <p className="text-xs sm:text-sm ">₹416/kg for 6 kgs+</p> <span className="text-green-600 sm:text-sm">Add 6</span>
+                   </div>
+
+
                 {/* Add to Cart Button */}
-                   <button
-                   style={{cursor: "pointer"}}
-                    className={
-                      product.stock === 0
-                        ? "out-of-stock-btn"
-                        : isInCart
+                <button
+                  style={{ cursor: "pointer",marginBottom:"5px" }}
+                  className={
+                    product.stock === 0
+                      ? "out-of-stock-btn"
+                      : isInCart
                         ? "added-to-cart-btn"
                         : "add-to-cart-btn"
-                    }
-                    onClick={() => handleAddToCart(product)}
-                    disabled={product.stock === 0}
-                  >
-                    {product.stock === 0
-                      ? "Out of Stock"
-                      : isInCart
+                  }
+                  onClick={() => handleAddToCart(product)}
+                  disabled={product.stock === 0}
+                >
+                  {product.stock === 0
+                    ? "Out of Stock"
+                    : isInCart
                       ? "Added"
                       : "Add to cart 🛒"}
-                  </button>
+                </button>
+                
+
               </div>
             </div>
           );
