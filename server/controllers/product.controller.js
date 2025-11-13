@@ -28,11 +28,14 @@ const createProduct = async (req, res) => {
       priceInDollors,
       priceInEuros,
       price,
+      tax,
       discount,
       category,
       mainCategory
       // stock,
     } = req.body || {};
+
+    console.log("SSSSSS::===>", req.body, req.files);
     const errorMessages = [];
     if (!title) errorMessages.push("title is required");
     if (req.files.length == 0 || !req.files)
@@ -48,7 +51,6 @@ const createProduct = async (req, res) => {
     // if (!language) errorMessages.push("language is required");
     // if (!priceInDollors) errorMessages.push("priceInDollors is required");
     // if (!priceInEuros) errorMessages.push("priceInEuros is required");
-    if (!price) errorMessages.push("price is required");
     if (!discount) errorMessages.push("discount is required");
     if (!category) errorMessages.push("category is required");
     // if (!stock) errorMessages.push("stock is required");
@@ -87,7 +89,9 @@ const createProduct = async (req, res) => {
       // priceInDollors: Number(priceInDollors),
       // priceInEuros: Number(priceInEuros),
       price: Number(price),
+      package: req?.body?.package,
       discount: Number(discount),
+      tax: Number(tax),
       category,
       // stock,
       images,
@@ -222,6 +226,7 @@ const updateProduct = async (req, res) => {
       category,
       subCategory,
     } = req.body || {};
+    console.log("XXXXXXXX::=>", req.body);
     let priceInDollors = req.body.priceInDollors
       ? Number(req.body.priceInDollors)
       : undefined;
@@ -301,6 +306,31 @@ const updateProduct = async (req, res) => {
       product.subCategory = product.subCategory;
     }
     product.stock = stock ?? product.stock;
+
+    if (req.body.package) {
+      // When multipart/form-data, package may come as a JSON string
+      let parsedPackage = req.body.package;
+      if (typeof parsedPackage === "string") {
+        try {
+          parsedPackage = JSON.parse(parsedPackage);
+        } catch (err) {
+          console.error("Failed to parse package JSON:", err);
+          parsedPackage = [];
+        }
+      }
+
+      if (Array.isArray(parsedPackage)) {
+        product.package = parsedPackage.map((pkg) => ({
+          price: pkg.price ?? 0,
+          stock: pkg.stock ?? 0,
+          unit: pkg.unit ?? "",
+        }));
+      }
+    } else {
+      product.package = product.package;
+    }
+
+
     await product.save();
     return res.status(200).json({ message: "Product updated", product });
   } catch (error) {
@@ -474,7 +504,7 @@ const getProductsByMainCategory = async (req, res) => {
   const { id: mainCategoryId } = req.params;
   const limit = parseInt(req.query.limit) || 50;
   const page = parseInt(req.query.page) || 1;
-  
+
   try {
     // Find all categories under the main category
     const categories = await Category.find({ mainCategory: mainCategoryId }, "_id");
@@ -504,7 +534,7 @@ const getProductsByMainCategory = async (req, res) => {
       .populate("subCategory")
       .populate("mainCategory");
 
-      // Respond with paginated results
+    // Respond with paginated results
     return res.status(200).json({
       message: "Products under mainCategory",
       products,

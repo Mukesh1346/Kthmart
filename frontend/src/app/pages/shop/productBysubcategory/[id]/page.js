@@ -529,7 +529,7 @@ const Page = () => {
 
   // ✅ UI Render
   return (
-       <>
+    <>
 
 
       <div className="max-w-7xl mx-auto px-4 py-8 mt-20 ">
@@ -542,14 +542,14 @@ const Page = () => {
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           {/* Sidebar - col-md-4 */}
-          <aside className="md:col-span-4 lg:col-span-3">
+          <aside className="md:col-span-4 lg:col-span-3" style={{ overflowY: 'scroll', height: '100vh', }}>
             <Sidebar
               categoryId={selectedCategoryId}
               onSubcategorySelect={(id) => setSelectedSubcategoryId(id)}
             />
           </aside>
 
-          <main className="md:col-span-8 lg:col-span-9">
+          <main className="md:col-span-8 lg:col-span-9" >
             <FilterCategories
               subcategoryId={subcategoryId}
               onCategorySelect={(cat) => setSelectedCategoryId(cat?._id)}
@@ -561,7 +561,7 @@ const Page = () => {
                 No products found.
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-2" style={{ overflowY: 'scroll', height: '90vh', scrollbarWidth: 'none', marginTop: '20px' }}>
                 {displayProducts?.map((product) => (
                   <div
                     key={product?._id}
@@ -636,13 +636,19 @@ const Page = () => {
                         }
                       </p>
 
-                      <div className="flex gap-2 mt-4 bg-gray-200 p-1 rounded">
+                      {product.package.map((item, index) => (
+                        <div className="flex gap-2 mt-4 bg-gray-200 p-1 rounded">
+                          <p className="text-xs text-[11px]   sm:text-sm ">₹{item?.price}/{item?.unit} for {item.stock} {item.unit}+</p> <span className="text-green-600 sm:text-sm">Add {item?.stock}</span>
+                        </div>
+                      ))}
+
+                      {/* <div className="flex gap-2 mt-4 bg-gray-200 p-1 rounded">
                         <p className="text-xs text-[11px]   sm:text-sm ">₹213/pack for 9 packs+</p> <span className="text-green-600 sm:text-sm">Add 9</span>
                       </div>
 
                       <div className="flex gap-2 justify-between mt-4 bg-gray-200 p-1 rounded">
                         <p className="text-xs sm:text-sm ">₹416/kg for 6 kgs+</p> <span className="text-green-600 sm:text-sm">Add 6</span>
-                      </div>
+                      </div> */}
 
                       <div className="flex items-baseline gap-2 mt-2">
                         <div className="text-base md:text-lg font-bold text-red-500">

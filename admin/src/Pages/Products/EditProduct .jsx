@@ -15,7 +15,7 @@ const EditProduct = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [categoryList, setCategoryList] = useState([]);
   const [subcategoryList, setSubcategoryList] = useState([]);
-
+  const [showPackage, setShowPackage] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     images: [],
@@ -35,6 +35,7 @@ const EditProduct = () => {
     publisher: "",
     publicationDate: "",
     language: "",
+    package: [{ price: 0, stock: 0, unit: 0 }]
   });
 
   useEffect(() => {
@@ -61,21 +62,24 @@ const EditProduct = () => {
     }
   };
 
- const fetchProductDetails = async (id) => {
-  try {
-    const res = await axiosInstance.get(`/api/v1/product/get-product/${id}`);
-    const product = res?.data?.product;
-    if (product) {
-      setFormData({
-        ...product,
-        mainCategory: product?.mainCategory|| "",
-        category: product?.category._id || "",
-      });
+  const fetchProductDetails = async (id) => {
+    try {
+      const res = await axiosInstance.get(`/api/v1/product/get-product/${id}`);
+      const product = res?.data?.product;
+      if (product) {
+        if (product?.package?.length > 0) {
+          setShowPackage(true);
+        }
+        setFormData({
+          ...product,
+          mainCategory: product?.mainCategory || "",
+          category: product?.category._id || "",
+        });
+      }
+    } catch (err) {
+      toast.error("Failed to load product.");
     }
-  } catch (err) {
-    toast.error("Failed to load product.");
-  }
-};
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -122,11 +126,55 @@ const EditProduct = () => {
       }
     }
 
+    // const payload = new FormData();
+    // Object.entries(formData).forEach(([key, value]) => {
+    //   if (Array.isArray(value)) {
+    //     value.forEach((item) => payload.append(key, item));
+    //   } else {
+    //     payload.append(key, value);
+    //   }
+    // });
+    // formData.priceField.forEach((item, index) => {
+    //   payload.append(`priceField[${index}][price]`, item.price);
+    //   payload.append(`priceField[${index}][discount]`, item.discount);
+    //   payload.append(`priceField[${index}][finalPrice]`, item.finalPrice);
+    //   payload.append(`priceField[${index}][quantity]`, item.quantity);
+    //   payload.append(`priceField[${index}][unit]`, item.unit);
+    // });
+
     const payload = new FormData();
+
+    // Loop through formData keys
     Object.entries(formData).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        value.forEach((item) => payload.append(key, item));
-      } else {
+      // 1️⃣ Handle images (FileList or array of File)
+      if (key === "images") {
+        if (Array.isArray(value)) {
+          value.forEach((file) => {
+            if (file instanceof File) {
+              payload.append("images", file);
+            }
+          });
+        } else if (value instanceof FileList) {
+          Array.from(value).forEach((file) => payload.append("images", file));
+        }
+      }
+
+      // 2️⃣ Handle package array separately
+      else if (key === "package" && Array.isArray(value)) {
+        value.forEach((pkg, index) => {
+          Object.entries(pkg).forEach(([pkgKey, pkgValue]) => {
+            payload.append(`package[${index}][${pkgKey}]`, pkgValue);
+          });
+        });
+      }
+
+      // 3️⃣ Handle other array fields (like tags, etc.)
+      else if (Array.isArray(value)) {
+        value.forEach((item) => payload.append(`${key}[]`, item));
+      }
+
+      // 4️⃣ Handle normal scalar values
+      else {
         payload.append(key, value);
       }
     });
@@ -145,6 +193,42 @@ const EditProduct = () => {
       setIsLoading(false);
     }
   };
+
+  const handlePriceFieldChange = (index, e) => {
+    const { name, value } = e.target;
+    const updatedFields = [...formData.package];
+
+    updatedFields[index][name] = value;
+
+    // Auto-calculate final price
+    // if (name === "price" || name === "discount") {
+    //   const price = parseFloat(updatedFields[index].price) || 0;
+    //   const discount = parseFloat(updatedFields[index].discount) || 0;
+    //   updatedFields[index].finalPrice = (price - (price * discount) / 100).toFixed(2);
+    // }
+
+    setFormData((prev) => ({ ...prev, package: updatedFields }));
+  };
+
+  // ✅ Add new field set correctly
+  const addFieldSet = () => {
+    setFormData((prev) => ({
+      ...prev,
+      package: [
+        ...prev.package,
+        { price: "", stock: "", unit: "" },
+      ],
+    }));
+  };
+
+  // ✅ Remove specific field set
+  const removeFieldSet = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      package: prev.package.filter((_, i) => i !== index),
+    }));
+  };
+
 
   return (
     <>
@@ -219,10 +303,17 @@ const EditProduct = () => {
             <JoditEditor value={formData.details} onChange={handleJoditDetailsChange} />
           </div>
 
-          <div className="row">
+          <div className="row align-items-end mb-3">
             <div className="col-md-2">
               <label className="form-label">Price*</label>
-              <input type="number" name="price" className="form-control" value={formData.price} onChange={handleChange} required />
+              <input
+                type="number"
+                name="price"
+                className="form-control"
+                value={formData?.price}
+                onChange={handleChange}
+                required
+              />
             </div>
 
             <div className="col-md-2">
@@ -231,7 +322,7 @@ const EditProduct = () => {
                 type="number"
                 name="discount"
                 className="form-control"
-                value={formData.discount}
+                value={formData?.discount}
                 onChange={handleChange}
                 min={0}
                 max={100}
@@ -241,9 +332,110 @@ const EditProduct = () => {
 
             <div className="col-md-2">
               <label className="form-label">Final Price*</label>
-              <input type="number" name="finalPrice" className="form-control" value={formData.finalPrice} readOnly />
+              <input
+                type="number"
+                name="finalPrice"
+                className="form-control"
+                value={formData?.finalPrice}
+                readOnly
+              />
+            </div>
+
+            <div className="col-md-2">
+              <label className="form-label">Select Tax</label>
+              <select
+                name="tax"
+                className="form-select"
+                value={formData?.tax}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select Tax</option>
+                <option value="0">0%</option>
+                <option value="5">5%</option>
+                <option value="10">10%</option>
+                <option value="15">15%</option>
+                <option value="18">18%</option>
+                <option value="30">30%</option>
+                <option value="40">40%</option>
+              </select>
             </div>
           </div>
+
+          <div>
+            <button
+              type="button"
+              className="btn btn-primary mb-3"
+              onClick={() => setShowPackage((prev) => !prev)}
+            >
+              {showPackage ? "Hide Packages" : "Add Packages"}
+            </button>
+          </div>
+
+          {showPackage ? <div>
+            {formData?.package?.map((field, index) => (
+              <div className="row align-items-end mb-3" key={index}>
+                <div className="col-md-2">
+                  <label className="form-label">Price*</label>
+                  <input
+                    type="number"
+                    name="price"
+                    className="form-control"
+                    value={field.price}
+                    onChange={(e) => handlePriceFieldChange(index, e)}
+                    required
+                  />
+                </div>
+
+                <div className="col-md-2">
+                  <label className="form-label">Add Quantity</label>
+                  <input
+                    type="text"
+                    name="stock"
+                    className="form-control"
+                    value={field?.stock}
+                    onChange={(e) => handlePriceFieldChange(index, e)}
+                  />
+                </div>
+
+                <div className="col-md-2">
+                  <label className="form-label">Select Unit</label>
+                  <select
+                    name="unit"
+                    className="form-select"
+                    value={field?.unit}
+                    onChange={(e) => handlePriceFieldChange(index, e)}
+                    required
+                  >
+                    <option value="">Select Unit</option>
+                    <option value="pcs">pcs</option>
+                    <option value="kg">kg</option>
+                    <option value="litre">litre</option>
+                  </select>
+                </div>
+
+                <div className="col-md-4">
+                  {index === 0 ? (
+                    <button
+                      type="button"
+                      className="btn btn-success mt-4"
+                      onClick={addFieldSet}
+                    >
+                      + Add Package
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn btn-danger mt-3"
+                      onClick={() => removeFieldSet(index)}
+                    >
+                      Remove Package
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div> : ''}
 
           <div className="row mt-3">
             <div className="col-md-4">

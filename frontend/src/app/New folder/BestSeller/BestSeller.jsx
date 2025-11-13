@@ -259,15 +259,6 @@ const BestSeller = ({ productlength = 4, btnlength = 8 }) => {
                       )}
                   </div>
 
-                  <div className="flex gap-2 justify-between mt-4 bg-gray-200 p-1 rounded"> 
-                   <p className="text-xs text-[11px]   sm:text-sm ">₹213/pack for 9 packs+</p> <span className="text-green-600 sm:text-sm">Add 9</span>
-                   </div>
-
-                   <div className="flex gap-2 justify-between mt-4 bg-gray-200 p-1 rounded"> 
-                   <p className="text-xs sm:text-sm ">₹416/kg for 6 kgs+</p> <span className="text-green-600 sm:text-sm">Add 6</span>
-                   </div>
-
-
                   <button
                   style={{cursor: "pointer"}}
                     className={

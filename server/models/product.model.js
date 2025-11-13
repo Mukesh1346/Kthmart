@@ -74,12 +74,30 @@ const productSchema = new mongoose.Schema(
     priceInEuros: {
       type: Number,
     },
-    priceInPounds:{
+    priceInPounds: {
       type: Number,
     },
     price: {
       type: Number,
     },
+    tax: {
+      type: Number,
+    },
+    package: [{
+      price: {
+        type: String,
+      },
+
+      finalPrice: {
+        type: String,
+      },
+      stock: {
+        type: String,
+      },
+      unit: {
+        type: String,
+      },
+    }],
     finalPrice: {
       type: Number,
     },

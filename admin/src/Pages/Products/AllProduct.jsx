@@ -339,12 +339,44 @@ const AllProduct = () => {
                       }
                     />
                   </td>
-                  <td>{product?.price}</td>
                   <td>
-                    {product?.discount || "-"}
-                    {product?.discount > 100 ? " ₹" : "%"}
+                    {Array.isArray(product?.priceField) && product?.priceField?.length > 0 ? (
+                      product?.priceField?.map((item, index) => (
+                        <div key={`price-${index}`}>
+                          ₹{parseFloat(item?.price || 0).toFixed(2)}
+                        </div>
+                      ))
+                    ) : (
+                      <div>₹{parseFloat(product?.price || 0).toFixed(2)}</div>
+                    )}
                   </td>
-                  <td>{product?.finalPrice?.toFixed(2)}</td>
+                  <td>
+                    {Array.isArray(product?.priceField) && product?.priceField?.length > 0 ? (
+                      product.priceField.map((item, index) => (
+                        <div key={index}>
+                          {item?.discount || 0}
+                          {item?.discount > 100 ? " ₹" : " %"}
+                        </div>
+                      ))
+                    ) : (
+                      <div>
+                        {product?.discount || 0}
+                        {product?.discount > 100 ? " ₹" : " %"}
+                      </div>
+                    )}
+                  </td>
+
+                  <td>
+                    {Array.isArray(product?.priceField) && product?.priceField?.length > 0 ? (
+                      product?.priceField?.map((item, index) => (
+                        <div key={index}>
+                          {parseFloat(item?.finalPrice || 0).toFixed(2)}
+                        </div>
+                      ))
+                    ) : (
+                      <div>{parseFloat(product?.finalPrice || 0).toFixed(2)}</div>
+                    )}
+                  </td>
                   <td>
                     <Link
                       to={`/edit-product/${product._id}`}
