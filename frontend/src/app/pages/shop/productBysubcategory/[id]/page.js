@@ -636,7 +636,7 @@ const Page = () => {
                         }
                       </p>
 
-                      {product.package.map((item, index) => (
+                      {product?.package.map((item, index) => (
                         <div className="flex gap-2 mt-4 bg-gray-200 p-1 rounded">
                           <p className="text-xs text-[11px]   sm:text-sm ">₹{item?.price}/{item?.unit} for {item.stock} {item.unit}+</p> <span className="text-green-600 sm:text-sm">Add {item?.stock}</span>
                         </div>
